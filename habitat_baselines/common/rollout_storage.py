@@ -32,16 +32,28 @@ class RolloutStorage:
         self.buffers["observations"] = TensorDict()
 
         for sensor in observation_space.spaces:
-            self.buffers["observations"][sensor] = torch.from_numpy(
-                np.zeros(
-                    (
-                        numsteps + 1,
-                        num_envs,
-                        *observation_space.spaces[sensor].shape,
-                    ),
-                    dtype=observation_space.spaces[sensor].dtype,
+            if observation_space.spaces[sensor].dtype == np.uint32:
+                self.buffers["observations"][sensor] = torch.from_numpy(
+                    np.zeros(
+                        (
+                            numsteps + 1,
+                            num_envs,
+                            *observation_space.spaces[sensor].shape,
+                        ),
+                        dtype=np.int32,
+                    )
                 )
-            )
+            else:
+                self.buffers["observations"][sensor] = torch.from_numpy(
+                    np.zeros(
+                        (
+                            numsteps + 1,
+                            num_envs,
+                            *observation_space.spaces[sensor].shape,
+                        ),
+                        dtype=observation_space.spaces[sensor].dtype,
+                    )
+                )
 
         self.buffers["recurrent_hidden_states"] = torch.zeros(
             numsteps + 1,
